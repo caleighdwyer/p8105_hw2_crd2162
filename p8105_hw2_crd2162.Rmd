@@ -17,45 +17,28 @@ In the chunk below, we will clean the data in pols-month.csv. This data
 pols_df =
   read_csv("data/pols-month.csv") |> 
   janitor::clean_names() |> 
-  separate(mon, into = c("year","month","day")) |> 
+  separate(col = mon, into = c("year","month","day"), sep = "-") |> 
+  mutate(
+    month = recode(
+      month,
+      "01" = "january",
+      "02" = "february",
+      "03" ="march",
+      "04" ="april",
+      "05" ="may",
+      "06" ="june",
+      "07" ="july",
+      "08" ="august",
+      "09" ="september",
+      "10" ="october",
+      "11" ="november",
+      "12" = "december")) |> 
   mutate(
     president =
       case_when (prez_gop == 1 ~ "gop",
                  prez_dem == 1 ~ "dem")) |> 
   select(-prez_gop, -prez_dem)
   
-
-    
-  mutate(
-    month = 
-      recode(
-        month, "01" = "january")) |> 
-  
-        ,
-        "03" ="march",
-        "04" ="april",
-        "05" ="may",
-        "06" ="june",
-        "07" ="july",
-        "08" ="august",
-        "09" ="september",
-        "10" ="october",
-        "11" ="november",
-        "12" = "december")
-    )
-
-
-        02 ="february",
-        03 ="march",
-        04 ="april",
-        05 ="may",
-        06 ="june",
-        07 ="july",
-        08 ="august",
-        09 ="september",
-        10 ="october",
-        11 ="november",
-        12 = "december"))
 
 view(pols_df)
 ```
@@ -65,7 +48,7 @@ In the chunk below, we will clean the data in snp.csv
 ```{r snp cleaning}
 snp_df =
   read_csv("data/snp.csv") |> 
-  janitor::clean_names() |> 
+  janitor::clean_names()
 ```
 
 In the chunk below, we will clean the data in unemployment.csv
@@ -74,6 +57,6 @@ In the chunk below, we will clean the data in unemployment.csv
 ```{r unemployment cleaning}
 unemployment_df =
   read_csv("data/unemployment.csv") |> 
-  janitor::clean_names() |> 
+  janitor::clean_names()
 ```
 
