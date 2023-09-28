@@ -35,7 +35,7 @@ pols_df =
       "12" = "december")) |> 
   mutate(
     president =
-      case_when (prez_gop == 1 ~ "gop",
+      case_when (prez_gop %in% c(1,2) ~ "gop",
                  prez_dem == 1 ~ "dem")) |> 
   select(-prez_gop, -prez_dem, -day)
   
@@ -50,7 +50,6 @@ snp_df =
   read_csv("data/snp.csv") |> 
   janitor::clean_names() |> 
   separate(col = date, into = c("year","month","day"), sep = "/")|> 
-  ##need to convert year from 1 to 01.
   mutate(
     month = recode(
       month,
@@ -65,7 +64,24 @@ snp_df =
       "9" ="september",
       "10" ="october",
       "11" ="november",
-      "12" = "december")) |> 
+      "12" = "december"))|>
+  mutate(
+    year = recode(
+      year,
+      "1" = "01",
+      "2" = "02",
+      "3" = "03",
+      "4" = "04",
+      "5" = "05",
+      "6" = "06",
+      "7" = "07",
+      "8" = "08",
+      "9" = "09")
+      ) |> 
+  year <- ifelse(as.integer(year) >= 47, 
+                    paste("19", abbreviated_year, sep = ""), 
+                    paste("20", abbreviated_year, sep = ""))
+##figure out range of years for snp_df and then create threshold based off that.
   select(-day)
 view(snp_df)
 ```
