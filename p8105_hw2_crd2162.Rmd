@@ -37,7 +37,7 @@ pols_df =
     president =
       case_when (prez_gop == 1 ~ "gop",
                  prez_dem == 1 ~ "dem")) |> 
-  select(-prez_gop, -prez_dem)
+  select(-prez_gop, -prez_dem, -day)
   
 
 view(pols_df)
@@ -48,7 +48,26 @@ In the chunk below, we will clean the data in snp.csv
 ```{r snp cleaning}
 snp_df =
   read_csv("data/snp.csv") |> 
-  janitor::clean_names()
+  janitor::clean_names() |> 
+  separate(col = date, into = c("year","month","day"), sep = "/")|> 
+  ##need to convert year from 1 to 01.
+  mutate(
+    month = recode(
+      month,
+      "1" = "january",
+      "2" = "february",
+      "3" ="march",
+      "4" ="april",
+      "5" ="may",
+      "6" ="june",
+      "7" ="july",
+      "8" ="august",
+      "9" ="september",
+      "10" ="october",
+      "11" ="november",
+      "12" = "december")) |> 
+  select(-day)
+view(snp_df)
 ```
 
 In the chunk below, we will clean the data in unemployment.csv
