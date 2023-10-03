@@ -5,7 +5,7 @@ date: "2023-09-26"
 output: github_document
 ---
 
-```{r load library}
+```{r load_library}
 library(tidyverse)
 library(readxl)
 ```
@@ -38,13 +38,14 @@ In the chunk below, we will clean the data in snp.csv from 538. This contains in
 
 ```{r snp_cleaned}
 snp = 
-  read_csv("data/snp.csv") |>
-  separate(date, into = c("month", "day", "year"), convert = TRUE) |>
-  arrange(year, month) |>
-  mutate(month = month.name[month]) |>
+  read_csv(
+    "data/snp.csv",
+    col_types = cols(date = col_date(format = "%m/%d/%y"))) |>
+  separate(date, into = c("year", "month_num", "day"), convert = TRUE) |>
+  mutate(
+    year = if_else(year > 2023, year - 100, year)) |> 
+  left_join(x = _, y = month_df) |> 
   select(year, month, close) 
-
-view(snp)
 ```
 
 
@@ -66,19 +67,6 @@ unemployment =
 In the chunk below, we merge the three datasets.
 
 ```{r merge_538}
-
-snp <- snp |>
-  mutate(
-    year_format = case_when(
-      year > 15 ~ paste0("19", year),
-      year >= 10 & year <= 15 ~ paste0("20", year),
-      year < 10 ~ paste0("200", year),
-      TRUE ~ as.character(year)  # Handle other cases
-    )
-  )
-
-snp$year_format <- as.integer(snp$year_format)
-
 data_538 = 
   left_join(pols, snp, by = c("year" = "year_format", "month" = "month")) |>
   left_join(x = _, y = unemployment, by = c("year", "month"))
@@ -87,3 +75,6 @@ str(data_538)
 view(data_538)
 ```
 
+Notice that there are some `NA` values in the `close` and `unemployment` variables, which indicate that the value of these variables is missing at those locations.
+
+Let's talk about the 538 datasets. The `pols` data has `r nrow(pols)` observations and `r ncol(pols)` variables and tells us about the party affiliation distribution (democrat or republican) for governors and senators for a given year from years `r pols |> pull(year) |> min()` to `r pols |> pull(year) |> max()`. It also tells us whether the sitting president was a democrat or republican. The `snp` data has `r nrow(snp)` observations and `r ncol(snp)` variables, ranging from years `r snp |> pull(year) |> min()` to `r snp |> pull(year) |> max()`. The `unemployment` data has `r nrow(unemployment)` observations and `r ncol(unemployment)` variables ranging from years `r unemployment |> pull(year) |> min()` to `r unemployment |> pull(year) |> max()`. In Januarys in or after 1975 in which a democrat was president, the **average unemployment rate was `r filter(data_538, month == "January", year >= 1975, president == "dem") |> pull(unemployment) |> mean() |> round(2)`**.  The average unemployment rate over the same time period in which a republican was president was `r filter(data_538, month == "January", year >= 1975, president == "gop") |> pull(unemployment) |> mean() |> round(2)`.
