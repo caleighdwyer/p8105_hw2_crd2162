@@ -142,7 +142,6 @@ Now we will join all three datasets in the chunk below, creating a combined data
 data_tw = 
  bind_rows(mtw_data,ptw_data,gtw_data) 
 
-view(data_tw)
 ```
 
 
@@ -151,3 +150,19 @@ The `data_tw` data has `r nrow(data_tw)` observations and `r ncol(data_tw)` vari
 The total weight of trash collected by Professor Trash Wheel was `r filter(data_tw, tw_type == "ptw") |> pull(weight_tons) |> sum()` tons.
 
 The total number of cigarette butts collected by Gwynnda in July of 2021 was `r filter(data_tw, tw_type == "gtw", year == 2021, month == "july") |> pull(cigarette_butts) |> sum()`.
+
+
+##Problem 3: Alzheimer's data
+
+This problem uses data collected from an observational study on the trajectory of Alzheimer's disease (AD) biomarkers. 
+
+In the chunk below we'll import, clean, and tidy the MCI_baseline dataset, which contains information on participant demographics at baseline.
+
+```{r}
+mci_baseline = 
+  read_csv("data/MCI_baseline.csv", skip=1) |> 
+  janitor::clean_names() |>
+
+view(mci_baseline)
+```
+
