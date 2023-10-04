@@ -162,7 +162,28 @@ In the chunk below we'll import, clean, and tidy the MCI_baseline dataset, which
 mci_baseline = 
   read_csv("data/MCI_baseline.csv", skip=1) |> 
   janitor::clean_names() |>
+  filter((current_age < age_at_onset | age_at_onset == ".")) |> 
+  mutate(
+    sex =
+      case_match(
+        sex,
+        1 ~ "male",
+        0 ~ "female"),
+    sex = as.factor(sex),
+    apoe4 = 
+      case_match(
+        apoe4,
+        1 ~ "carrier",
+        0 ~ "noncarrier"),
+    apoe4 = as.factor(apoe4)
+      )
 
 view(mci_baseline)
+
 ```
+
+The MCI study recruited `r nrow(mci_baseline)` participants and collected information on `r ncol(mci_baseline)` variables that tells us about the participants' age, sex, years of education, whether or not they are an APOE4 gene carrier, and age at the onset of MCI if it developed during the follow-up period. 
+
+During the study, `r sum(pull(mci_baseline, age_at_onset) != ".")` participants developed MCI. The average baseline age was `r mean(pull(mci_baseline, current_age)) |> round(2)`. The proportion of women in the study who are apoe4 carriers is `r mci_baseline |> filter(sex == "female", apoe4 == "carrier") |> nrow()/sum(pull(mci_baseline, sex) == "female") * 100`%.
+
 
